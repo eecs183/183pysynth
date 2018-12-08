@@ -30,7 +30,7 @@
 
 from demosongs import *
 from mkfreq import getfreq
-import tqdm
+from tqdm import tqdm
 
 pitchhz, keynum = getfreq()
 
