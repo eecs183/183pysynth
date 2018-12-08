@@ -36,6 +36,7 @@ from math import sin, cos, pi, log, exp
 from mixfiles import mix_files
 from demosongs import *
 from mkfreq import getfreq, getfn
+from tqdm import tqdm
 
 pitchhz, keynum = getfreq()
 
@@ -139,39 +140,39 @@ def make_wav(song,bpm=120,transpose=0,leg_stac=.9,boost=1.1,repeat=0,fn="out.wav
 			y += '4'
 	data = np.zeros(int((repeat+1)*t_len + 480000))
 
-	for rp in range(repeat+1):
-		for nn, x in enumerate(song):
-			if not nn % 4 and silent == False:
-				print("[%u/%u]\t" % (nn+1,len(song)))
-			if x[0]!='r':
-				if x[0][-1] == '*':
-					vol = boost
-					note = x[0][:-1]
-				else:
-					vol = 1.
-					note = x[0]
-				if not note[-1].isdigit():
-					note += '4'		# default to fourth octave
-				a=pitchhz[note]
-				kn = keynum[note]
-				a = a * 2**transpose
-				if x[1] < 0:
-					b=length(-2.*x[1]/3.)
-				else:
+
+	print()
+	with tqdm(total=((repeat + 1) * len(song)), ncols=80, desc="Writing to file") as pbar:
+		for rp in range(repeat+1):
+			for nn, x in enumerate(song):
+				pbar.update(1)
+				if x[0]!='r':
+					if x[0][-1] == '*':
+						vol = boost
+						note = x[0][:-1]
+					else:
+						vol = 1.
+						note = x[0]
+					if not note[-1].isdigit():
+						note += '4'		# default to fourth octave
+					a=pitchhz[note]
+					kn = keynum[note]
+					a = a * 2**transpose
+					if x[1] < 0:
+						b=length(-2.*x[1]/3.)
+					else:
+						b=length(x[1])
+
+					render2(a, b, vol, int(ex_pos), kn, note)
+					ex_pos = ex_pos + b
+
+				if x[0]=='r':
 					b=length(x[1])
-
-				render2(a, b, vol, int(ex_pos), kn, note)
-				ex_pos = ex_pos + b
-
-			if x[0]=='r':
-				b=length(x[1])
-				ex_pos = ex_pos + b
+					ex_pos = ex_pos + b
 
 	##########################################################################
 	# Write to output file (in WAV format)
 	##########################################################################
-	if silent == False:
-		print("Writing to file", fn)
 
 	data = data / (data.max() * 2.)
 	out_len = int(2. * 48000. + ex_pos+.5)

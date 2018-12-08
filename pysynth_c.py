@@ -31,6 +31,7 @@
 from __future__ import division
 from demosongs import *
 from mkfreq import getfreq
+from tqdm import tqdm
 
 pitchhz, keynum = getfreq()
 
@@ -104,38 +105,38 @@ def make_wav(song,bpm=120,transpose=0,pause=.05,boost=1.1,repeat=0,fn="out.wav",
 	# Write to output file (in WAV format)
 	##########################################################################
 
-	if silent == False:
-		print("Writing to file", fn)
 	curpos = 0
 	ex_pos = 0.
-	for rp in range(repeat+1):
-		for nn, x in enumerate(song):
-			if not nn % 4 and silent == False:
-				print("[%u/%u]\t" % (nn+1,len(song)))
-			if x[0]!='r':
-				if x[0][-1] == '*':
-					vol = boost
-					note = x[0][:-1]
-				else:
-					vol = 1.
-					note = x[0]
-				try:
-					a=pitchhz[note]
-				except:
-					a=pitchhz[note + '4']	# default to fourth octave
-				a = a * 2**transpose
-				if x[1] < 0:
-					b=length(-2.*x[1]/3.)
-				else:
-					b=length(x[1])
-				ex_pos = ex_pos + b
-				curpos = curpos + render2(a,b,vol)
 
-			if x[0]=='r':
-				b=length(x[1])
-				ex_pos = ex_pos + b
-				f.writeframesraw(sixteenbit(0)*int(b))
-				curpos = curpos + int(b)
+	print()
+	with tqdm(total=((repeat + 1) * len(song)), ncols=80, desc="Writing to file") as pbar:
+		for rp in range(repeat+1):
+			for nn, x in enumerate(song):
+				pbar.update(1)
+				if x[0]!='r':
+					if x[0][-1] == '*':
+						vol = boost
+						note = x[0][:-1]
+					else:
+						vol = 1.
+						note = x[0]
+					try:
+						a=pitchhz[note]
+					except:
+						a=pitchhz[note + '4']	# default to fourth octave
+					a = a * 2**transpose
+					if x[1] < 0:
+						b=length(-2.*x[1]/3.)
+					else:
+						b=length(x[1])
+					ex_pos = ex_pos + b
+					curpos = curpos + render2(a,b,vol)
+
+				if x[0]=='r':
+					b=length(x[1])
+					ex_pos = ex_pos + b
+					f.writeframesraw(sixteenbit(0)*int(b))
+					curpos = curpos + int(b)
 
 	f.writeframes(b'')
 	f.close()

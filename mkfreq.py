@@ -44,8 +44,3 @@ def getfn(layer):
 		sampfn[k] = "%s%uv%u.wav" % (nam[(k // 3) % 4], oct, layer), facs[k % 3]
 	return sampfn
 
-#x = getfn()
-#for a in x:
-#	print(a, x[a])
-
-
