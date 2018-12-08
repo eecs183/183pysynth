@@ -123,11 +123,10 @@ def make_wav(song,bpm=120,transpose=0,pause=.05,boost=1.1,repeat=0,fn="out.wav",
 	# Write to output file (in WAV format)
 	##########################################################################
 
-	print("Writing to file", fn)
 	curpos = 0
 	ex_pos = 0.
 
-	with tqdm(total=((repeat + 1) * len(song))) as pbar:
+	with tqdm(total=((repeat + 1) * len(song)), ncols=80, desc="Writing to file") as pbar:
 		for rp in range(repeat+1):
 			for nn, x in enumerate(song):
 				pbar.update(1)
