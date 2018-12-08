@@ -30,6 +30,7 @@
 
 from demosongs import *
 from mkfreq import getfreq
+import tqdm
 
 pitchhz, keynum = getfreq()
 
@@ -122,14 +123,16 @@ def make_wav(song,bpm=120,transpose=0,pause=.05,boost=1.1,repeat=0,fn="out.wav",
 	# Write to output file (in WAV format)
 	##########################################################################
 
-	if silent == False:
-		print("Writing to file", fn)
+	print("Writing to file", fn)
 	curpos = 0
 	ex_pos = 0.
+
+	with tqdm(total=((repeat + 1) * len(song))) as pbar:
 	for rp in range(repeat+1):
 		for nn, x in enumerate(song):
-			if not nn % 4 and silent == False:
-				print("[%u/%u]\t" % (nn+1,len(song)))
+			pbar.update(1)
+			# if not nn % 4 and silent == False:
+			# 	print("[%u/%u]\t" % (nn+1,len(song)))
 			if x[0]!='r':
 				if x[0][-1] == '*':
 					vol = boost
